@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marc Finance Pro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --primary: #064e3b; /* Vert Foncé demandé */
+    --accent: #10b981;
+    --red: #ef4444;
+    --text: #f8fafc;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+}
+
+/* LOGO QUI TOURNE SUR LUI-MÊME */
+.logo-container {
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.logo {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-block;
+    animation: rotate3D 6s linear infinite;
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes rotate3D {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+
+/* LOCK SCREEN */
+.lock-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.lock-screen input {
+    width: 100%;
+    max-width: 250px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: var(--card);
+    color: white;
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.lock-screen button {
+    width: 100%;
+    max-width: 250px;
+    padding: 15px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    color: var(--bg);
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
+.container { max-width: 900px; margin: auto; padding: 15px; }
+
+.card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.summary-box {
+    background: var(--card);
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.summary-box h3 { font-size: 12px; margin: 0; opacity: 0.7; text-transform: uppercase; }
+.summary-box p { font-size: 16px; font-weight: bold; margin: 8px 0 0; }
+
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+input, select, button { padding: 12px; border-radius: 10px; border: none; font-size: 14px; }
+input, select { background: #0f172a; color: white; border: 1px solid #334155; }
+.full-w { grid-column: span 2; }
+form button { background: var(--accent); color: var(--bg); font-weight: bold; }
+
+.t-item {
+    background: #33415555;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.green { color: var(--accent); }
+.red { color: var(--red); }
+
+canvas { max-height: 250px; }
+</style>
+</head>
+<body>
+
+<div class="lock-screen" id="lockScreen">
+    <div class="logo">MARC FINANCE</div>
+    <input type="password" id="passwordInput" placeholder="PIN de Acesso">
+    <button onclick="checkPassword()">ENTRAR</button>
+    <p id="errorMsg" class="red" style="margin-top:10px"></p>
+</div>
+
+<div id="mainContent" class="hidden">
+    <div class="container">
+        <div class="logo-container"><div class="logo">MARC FINANCE</div></div>
+
+        <div class="summary-grid">
+            <div class="summary-box"><h3>Entradas</h3><p id="totalGain" class="green">R$ 0,00</p></div>
+            <div class="summary-box"><h3>Saídas</h3><p id="totalExpense" class="red">R$ 0,00</p></div>
+            <div class="summary-box"><h3>Saldo</h3><p id="balance">R$ 0,00</p></div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 16px; margin-top:0">Gráfico de Evolução</h2>
+            <canvas id="financeChart"></canvas>
+        </div>
+
+        <div class="card">
+            <form id="form">
+                <input type="date" id="date" required class="full-w">
+                <input type="text" id="desc" placeholder="Descrição" required class="full-w">
+                <input type="text" id="category" placeholder="Categoria" required>
+                <select id="type">
+                    <option value="gain">Ganho (+)</option>
+                    <option value="expense">Despesa (-)</option>
+                </select>
+                <input type="number" step="0.01" id="amount" placeholder="Valor R$" required class="full-w">
+                <button type="submit" class="full-w">SALVAR TRANSAÇÃO</button>
+            </form>
+        </div>
+
+        <div id="transactionsList"></div>
+    </div>
+</div>
+
+<script type="module">
+// IMPORT FIREBASE CDN
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// VOS IDENTIFIANTS RÉELS
+const firebaseConfig = {
+    apiKey: "AIzaSyAwoHA7RY9IRZOHIVTuiJJsQxAOCsND374",
+    authDomain: "marcfinance-32a54.firebaseapp.com",
+    projectId: "marcfinance-32a54",
+    storageBucket: "marcfinance-32a54.firebasestorage.app",
+    messagingSenderId: "927403672360",
+    appId: "1:927403672360:web:f876e9d7be08325addc61d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const PASSWORD = "071301";
+let myChart = null;
+
+window.checkPassword = () => {
+    if(document.getElementById("passwordInput").value === PASSWORD){
+        document.getElementById("lockScreen").classList.add("hidden");
+        document.getElementById("mainContent").classList.remove("hidden");
+        initApp();
+    } else {
+        document.getElementById("errorMsg").innerText = "Senha incorreta!";
+    }
+};
+
+function initApp() {
+    const q = query(collection(db, "transactions"), orderBy("date", "desc"));
+    onSnapshot(q, (snapshot) => {
+        const data = [];
+        snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+        render(data);
+    });
+}
+
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "transactions"), {
+        date: document.getElementById("date").value,
+        desc: document.getElementById("desc").value,
+        category: document.getElementById("category").value,
+        type: document.getElementById("type").value,
+        amount: parseFloat(document.getElementById("amount").value),
+        timestamp: Date.now()
+    });
+    e.target.reset();
+};
+
+window.removeT = async (id) => {
+    if(confirm("Deseja excluir esta transação?")) await deleteDoc(doc(db, "transactions", id));
+};
+
+function render(data) {
+    const list = document.getElementById("transactionsList");
+    list.innerHTML = "<h2 style='font-size:16px'>Histórico Recente</h2>";
+    
+    let g = 0, e = 0; const cData = {};
+
+    data.forEach(t => {
+        if(t.type === "gain") g += t.amount; else e += t.amount;
+        const m = t.date.substring(0, 7);
+        if(!cData[m]) cData[m] = { g: 0, e: 0 };
+        cData[m][t.type === "gain" ? 'g' : 'e'] += t.amount;
+
+        list.innerHTML += `
+            <div class="t-item">
+                <div>
+                    <small style="opacity:0.6">${t.date}</small><br>
+                    <strong>${t.desc}</strong><br>
+                    <small>${t.category}</small>
+                </div>
+                <div style="text-align:right">
+                    <span class="${t.type === 'gain' ? 'green' : 'red'}">
+                        ${t.type === 'gain' ? '+' : '-'} R$ ${t.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    </span><br>
+                    <button onclick="removeT('${t.id}')" style="background:none; color:grey; font-size:10px; cursor:pointer">Remover</button>
+                </div>
+            </div>`;
+    });
+
+    document.getElementById("totalGain").innerText = `R$ ${g.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById("totalExpense").innerText = `R$ ${e.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    const bal = g - e;
+    const balEl = document.getElementById("balance");
+    balEl.innerText = `R$ ${bal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    balEl.className = bal >= 0 ? "green" : "red";
+
+    updateChart(cData);
+}
+
+function updateChart(cData) {
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    const labels = Object.keys(cData).sort();
+    
+    if(myChart) myChart.destroy();
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ganhos',
+                data: labels.map(l => cData[l].g),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Saídas',
+                data: labels.map(l => cData[l].e),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: 'white' } } },
+            scales: {
+                y: { grid: { color: '#334155' }, ticks: { color: 'white' } },
+                x: { grid: { display: false }, ticks: { color: 'white' } }
+            }
+        }
+    });
+}
+</script>
+</body>
+</html>
