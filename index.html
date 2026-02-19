@@ -11,10 +11,11 @@
 :root {
     --bg: #0f172a;
     --card: #1e293b;
-    --primary: #064e3b; /* Vert Foncé demandé */
+    --primary: #064e3b;
     --accent: #10b981;
     --red: #ef4444;
     --text: #f8fafc;
+    --gray-light: #94a3b8;
 }
 
 body {
@@ -25,116 +26,45 @@ body {
     padding-bottom: 40px;
 }
 
-/* LOGO QUI TOURNE SUR LUI-MÊME */
-.logo-container {
-    perspective: 1000px;
-    display: flex;
-    justify-content: center;
-    margin: 30px 0;
-}
-
+.logo-container { perspective: 1000px; display: flex; justify-content: center; margin: 30px 0; }
 .logo {
-    font-size: 38px;
-    font-weight: 800;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    display: inline-block;
+    font-size: 38px; font-weight: 800; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 2px;
     animation: rotate3D 6s linear infinite;
-    text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
-@keyframes rotate3D {
-    0% { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
-}
+@keyframes rotate3D { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
 
 /* LOCK SCREEN */
-.lock-screen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.lock-screen input {
-    width: 100%;
-    max-width: 250px;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    background: var(--card);
-    color: white;
-    text-align: center;
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-}
-
-.lock-screen button {
-    width: 100%;
-    max-width: 250px;
-    padding: 15px;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    color: var(--bg);
-    cursor: pointer;
-}
+.lock-screen { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+.lock-screen input { width: 100%; max-width: 250px; padding: 15px; border-radius: 12px; border: 1px solid #334155; background: var(--card); color: white; text-align: center; margin-bottom: 15px; }
+.lock-screen button { width: 100%; max-width: 250px; padding: 15px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
 .hidden { display: none !important; }
 .container { max-width: 900px; margin: auto; padding: 15px; }
 
-.card {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
+.card { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
 
-.summary-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.summary-box {
-    background: var(--card);
-    padding: 15px;
-    border-radius: 15px;
-    text-align: center;
-}
-
-.summary-box h3 { font-size: 12px; margin: 0; opacity: 0.7; text-transform: uppercase; }
-.summary-box p { font-size: 16px; font-weight: bold; margin: 8px 0 0; }
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.summary-box { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; }
+.summary-box h3 { font-size: 11px; margin: 0; opacity: 0.7; text-transform: uppercase; }
+.summary-box p { font-size: 15px; font-weight: bold; margin: 8px 0 0; }
+.balance-text { color: var(--gray-light); }
 
 form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-input, select, button { padding: 12px; border-radius: 10px; border: none; font-size: 14px; }
-input, select { background: #0f172a; color: white; border: 1px solid #334155; }
+input, select, button { padding: 12px; border-radius: 10px; border: 1px solid #334155; font-size: 14px; background: #0f172a; color: white; }
 .full-w { grid-column: span 2; }
-form button { background: var(--accent); color: var(--bg); font-weight: bold; }
+form button { background: var(--accent); color: var(--bg); font-weight: bold; border: none; }
 
-.t-item {
-    background: #33415555;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+/* FILTROS */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+.filter-bar select, .filter-bar input { padding: 8px; font-size: 12px; flex-shrink: 0; }
 
+.t-item { background: #33415555; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 .green { color: var(--accent); }
 .red { color: var(--red); }
 
-canvas { max-height: 250px; }
+.chart-container { position: relative; height: 280px; margin: auto; }
 </style>
 </head>
 <body>
@@ -153,26 +83,60 @@ canvas { max-height: 250px; }
         <div class="summary-grid">
             <div class="summary-box"><h3>Entradas</h3><p id="totalGain" class="green">R$ 0,00</p></div>
             <div class="summary-box"><h3>Saídas</h3><p id="totalExpense" class="red">R$ 0,00</p></div>
-            <div class="summary-box"><h3>Saldo</h3><p id="balance">R$ 0,00</p></div>
+            <div class="summary-box"><h3>Saldo Atual</h3><p id="balance" class="balance-text">R$ 0,00</p></div>
         </div>
 
         <div class="card">
-            <h2 style="font-size: 16px; margin-top:0">Gráfico de Evolução</h2>
-            <canvas id="financeChart"></canvas>
+            <h2 style="font-size: 16px; margin-top:0; text-align: center;">Distribuição Financeira (%)</h2>
+            <div class="chart-container">
+                <canvas id="financeChart"></canvas>
+            </div>
         </div>
 
         <div class="card">
             <form id="form">
                 <input type="date" id="date" required class="full-w">
-                <input type="text" id="desc" placeholder="Descrição" required class="full-w">
-                <input type="text" id="category" placeholder="Categoria" required>
+                <input type="text" id="desc" placeholder="Descrição (Ex: Almoço)" required class="full-w">
+                
+                <select id="category" required>
+                    <option value="" disabled selected>Categoria</option>
+                    <option value="Comprar Mercado">Comprar Mercado</option>
+                    <option value="Uber">Uber</option>
+                    <option value="Pix P2P">Pix P2P</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Outros">Outros</option>
+                </select>
+
+                <select id="bank" required>
+                    <option value="" disabled selected>Banco/Carteira</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Bradesco">Bradesco</option>
+                    <option value="Nubank">Nubank</option>
+                    <option value="Sicredi">Sicredi</option>
+                    <option value="Dinheiro">Dinheiro (Espécie)</option>
+                </select>
+
                 <select id="type">
                     <option value="gain">Ganho (+)</option>
                     <option value="expense">Despesa (-)</option>
                 </select>
-                <input type="number" step="0.01" id="amount" placeholder="Valor R$" required class="full-w">
+                <input type="number" step="0.01" id="amount" placeholder="Valor R$" required>
+                
                 <button type="submit" class="full-w">SALVAR TRANSAÇÃO</button>
             </form>
+        </div>
+
+        <div class="filter-bar">
+            <select id="filterBank" onchange="applyFilters()">
+                <option value="">Todos os Bancos</option>
+                <option value="Caixa">Caixa</option>
+                <option value="Bradesco">Bradesco</option>
+                <option value="Nubank">Nubank</option>
+                <option value="Sicredi">Sicredi</option>
+                <option value="Dinheiro">Dinheiro</option>
+            </select>
+            <input type="month" id="filterMonth" onchange="applyFilters()">
         </div>
 
         <div id="transactionsList"></div>
@@ -180,12 +144,10 @@ canvas { max-height: 250px; }
 </div>
 
 <script type="module">
-// IMPORT FIREBASE CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// VOS IDENTIFIANTS RÉELS
 const firebaseConfig = {
     apiKey: "AIzaSyAwoHA7RY9IRZOHIVTuiJJsQxAOCsND374",
     authDomain: "marcfinance-32a54.firebaseapp.com",
@@ -199,6 +161,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const PASSWORD = "071301";
 let myChart = null;
+let allTransactions = [];
 
 window.checkPassword = () => {
     if(document.getElementById("passwordInput").value === PASSWORD){
@@ -213,9 +176,9 @@ window.checkPassword = () => {
 function initApp() {
     const q = query(collection(db, "transactions"), orderBy("date", "desc"));
     onSnapshot(q, (snapshot) => {
-        const data = [];
-        snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
-        render(data);
+        allTransactions = [];
+        snapshot.forEach(doc => allTransactions.push({ id: doc.id, ...doc.data() }));
+        applyFilters();
     });
 }
 
@@ -225,6 +188,7 @@ document.getElementById("form").onsubmit = async (e) => {
         date: document.getElementById("date").value,
         desc: document.getElementById("desc").value,
         category: document.getElementById("category").value,
+        bank: document.getElementById("bank").value,
         type: document.getElementById("type").value,
         amount: parseFloat(document.getElementById("amount").value),
         timestamp: Date.now()
@@ -236,77 +200,75 @@ window.removeT = async (id) => {
     if(confirm("Deseja excluir esta transação?")) await deleteDoc(doc(db, "transactions", id));
 };
 
+window.applyFilters = () => {
+    const bankF = document.getElementById("filterBank").value;
+    const monthF = document.getElementById("filterMonth").value;
+
+    const filtered = allTransactions.filter(t => {
+        const matchBank = bankF === "" || t.bank === bankF;
+        const matchMonth = monthF === "" || t.date.startsWith(monthF);
+        return matchBank && matchMonth;
+    });
+
+    render(filtered);
+};
+
 function render(data) {
     const list = document.getElementById("transactionsList");
-    list.innerHTML = "<h2 style='font-size:16px'>Histórico Recente</h2>";
+    list.innerHTML = "<h2 style='font-size:16px'>Histórico</h2>";
     
-    let g = 0, e = 0; const cData = {};
-
+    let g = 0, e = 0;
     data.forEach(t => {
         if(t.type === "gain") g += t.amount; else e += t.amount;
-        const m = t.date.substring(0, 7);
-        if(!cData[m]) cData[m] = { g: 0, e: 0 };
-        cData[m][t.type === "gain" ? 'g' : 'e'] += t.amount;
-
         list.innerHTML += `
             <div class="t-item">
                 <div>
-                    <small style="opacity:0.6">${t.date}</small><br>
+                    <small style="opacity:0.6">${t.date} • ${t.bank}</small><br>
                     <strong>${t.desc}</strong><br>
-                    <small>${t.category}</small>
+                    <small style="color:var(--accent)">${t.category}</small>
                 </div>
                 <div style="text-align:right">
                     <span class="${t.type === 'gain' ? 'green' : 'red'}">
                         ${t.type === 'gain' ? '+' : '-'} R$ ${t.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                     </span><br>
-                    <button onclick="removeT('${t.id}')" style="background:none; color:grey; font-size:10px; cursor:pointer">Remover</button>
+                    <button onclick="removeT('${t.id}')" style="background:none; border:none; color:grey; font-size:10px; cursor:pointer">Remover</button>
                 </div>
             </div>`;
     });
 
     document.getElementById("totalGain").innerText = `R$ ${g.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
     document.getElementById("totalExpense").innerText = `R$ ${e.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-    const bal = g - e;
-    const balEl = document.getElementById("balance");
-    balEl.innerText = `R$ ${bal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-    balEl.className = bal >= 0 ? "green" : "red";
+    document.getElementById("balance").innerText = `R$ ${(g - e).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-    updateChart(cData);
+    updateChart(g, e);
 }
 
-function updateChart(cData) {
+function updateChart(g, e) {
     const ctx = document.getElementById('financeChart').getContext('2d');
-    const labels = Object.keys(cData).sort();
-    
+    const total = g + e;
+    const pG = total > 0 ? ((g / total) * 100).toFixed(1) : 0;
+    const pE = total > 0 ? ((e / total) * 100).toFixed(1) : 0;
+
     if(myChart) myChart.destroy();
 
     myChart = new Chart(ctx, {
-        type: 'line',
+        type: 'doughnut',
         data: {
-            labels: labels,
+            labels: [`Entradas (${pG}%)`, `Saídas (${pE}%)`],
             datasets: [{
-                label: 'Ganhos',
-                data: labels.map(l => cData[l].g),
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.4,
-                fill: true
-            }, {
-                label: 'Saídas',
-                data: labels.map(l => cData[l].e),
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                tension: 0.4,
-                fill: true
+                data: [g, e],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 0,
+                hoverOffset: 10
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { labels: { color: 'white' } } },
-            scales: {
-                y: { grid: { color: '#334155' }, ticks: { color: 'white' } },
-                x: { grid: { display: false }, ticks: { color: 'white' } }
-            }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: 'white', padding: 20 } }
+            },
+            cutout: '70%'
         }
     });
 }
